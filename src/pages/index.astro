@@ -84,17 +84,24 @@ const topTags = Object.entries(tagCounts)
 </Layout>
 
 <script>
+  const TAG_GROUPS: Record<string, string[]> = {
+    'Drum & Bass': ['Drum & Bass', 'Liquid Drum & Bass', 'Minimal D&B'],
+    'Reggae': ['Reggae', 'Dub Reggae'],
+    'Hip Hop': ['Hip Hop', 'Instrumental Hip Hop'],
+  }
+
   const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
   const cards = document.querySelectorAll<HTMLLIElement>('.card')
   const countVisible = document.getElementById('count-visible')!
   const noResults = document.querySelector<HTMLParagraphElement>('.no-results')!
 
   function filter(tag: string) {
+    const matchTags = TAG_GROUPS[tag] ?? (tag ? [tag] : null)
     let visible = 0
 
     cards.forEach((card) => {
-      const tags = card.dataset.tags ?? ''
-      const match = !tag || tags.split('|').includes(tag)
+      const cardTags = (card.dataset.tags ?? '').split('|')
+      const match = !matchTags || matchTags.some((t) => cardTags.includes(t))
       card.hidden = !match
       if (match) visible++
     })
