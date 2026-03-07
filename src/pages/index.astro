@@ -21,8 +21,9 @@ const tagCounts: Record<string, number> = {}
 episodes.forEach((ep) => ep.tags.forEach((t) => { tagCounts[t] = (tagCounts[t] ?? 0) + 1 }))
 const topTags = Object.entries(tagCounts)
   .sort((a, b) => b[1] - a[1])
-  .slice(0, 20)
+  .slice(0, 35)
   .map(([tag]) => tag)
+  .sort((a, b) => a.localeCompare(b))
 ---
 
 <Layout>
