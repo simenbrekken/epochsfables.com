@@ -14,6 +14,66 @@ const DATA_FILE = join(__dirname, '..', 'data', 'episodes.json')
 const BASE_URL = 'https://api.mixcloud.com/kingstonpork/cloudcasts/'
 const PAGE_SIZE = 100
 
+/**
+ * Maps raw tag variants to a canonical form.
+ * Keys are lowercase for case-insensitive matching.
+ */
+const TAG_ALIASES = {
+  // Drum & Bass
+  'drum and bass': 'Drum & Bass',
+  "drum'n'bass": 'Drum & Bass',
+  'd&b': 'Drum & Bass',
+  'minimal d&b': 'Minimal D&B',
+  'liquid drum and bass': 'Liquid Drum & Bass',
+  'atmospheric drum and bass': 'Drum & Bass',
+  'techstep': 'Drum & Bass',
+
+  // Downtempo
+  'downtemp': 'Downtempo',
+  'downtmpo': 'Downtempo',
+  'midtempo': 'Downtempo',
+
+  // Soundtrack(s)
+  'soundtracks': 'Soundtrack',
+  'soundtrtack': 'Soundtrack',
+
+  // Balearic
+  'balaeric': 'Balearic',
+  'balic': 'Baltic',
+
+  // Lo-fi / Slo-fi
+  'slow-fi': 'Lo-fi',
+  'slo fi': 'Lo-fi',
+
+  // Slowcore
+  'slow-core': 'Slowcore',
+  'slow-wave': 'Slo:Wave',
+
+  // Instrumental Hip Hop
+  'instumental hip hop': 'Instrumental Hip Hop',
+  'intrumental hip hop': 'Instrumental Hip Hop',
+  'inst. hip hip': 'Instrumental Hip Hop',
+  'instrumental hip hop': 'Instrumental Hip Hop',
+  'underground hip hop': 'Hip Hop',
+
+  // Footwork
+  'footwork/juke': 'Footwork',
+  'footwork / juke': 'Footwork',
+
+  // Vaporwave
+  'vapourware': 'Vaporwave',
+
+  // Left Handed Japanese Trap (kingstonpork's own tag — keep but unify casing)
+  'lefthandedjapanesefirst': 'Left Handed Japanese Trap',
+  'lefthandedjapanesestep': 'Left Handed Japanese Trap',
+  'lefthanded japanese trap': 'Left Handed Japanese Trap',
+}
+
+function normaliseTag(raw) {
+  const lower = raw.toLowerCase().trim()
+  return TAG_ALIASES[lower] ?? raw.trim()
+}
+
 function loadExisting() {
   try {
     return JSON.parse(readFileSync(DATA_FILE, 'utf8'))
@@ -23,13 +83,16 @@ function loadExisting() {
 }
 
 function normaliseEpisode(raw) {
+  const rawTags = (raw.tags ?? []).map((t) => t.name)
+  const tags = [...new Set(rawTags.map(normaliseTag))]
+
   return {
     key: raw.key,
     slug: raw.slug,
     name: raw.name,
     url: raw.url,
     description: raw.description ?? '',
-    tags: (raw.tags ?? []).map((t) => t.name),
+    tags,
     pictures: raw.pictures ?? {},
     audio_length: raw.audio_length ?? 0,
     created_time: raw.created_time,
@@ -72,9 +135,15 @@ async function fetchAll() {
 
   const newEpisodes = allFetched.filter((e) => !existingSlugs.has(e.slug))
 
+  // Re-normalise tags on existing episodes too (picks up alias changes)
+  const normalisedExisting = existing.map((ep) => ({
+    ...ep,
+    tags: [...new Set(ep.tags.map(normaliseTag))],
+  }))
+
   const merged = [
     ...newEpisodes,
-    ...existing,
+    ...normalisedExisting,
   ].sort((a, b) => new Date(b.created_time) - new Date(a.created_time))
 
   mkdirSync(dirname(DATA_FILE), { recursive: true })
