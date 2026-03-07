@@ -29,7 +29,7 @@ const topTags = Object.entries(tagCounts)
   <header>
     <div class="header-inner">
       <h1>Epoch's Fables</h1>
-      <p class="subtitle">{episodes.length} mixes by <a href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">kingstonpork</a></p>
+      <p class="subtitle">by <a href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">kingstonpork</a></p>
     </div>
   </header>
 
@@ -43,6 +43,9 @@ const topTags = Object.entries(tagCounts)
   </nav>
 
   <main>
+    <p class="count" aria-live="polite" aria-atomic="true">
+      <span id="count-visible">{episodes.length}</span> of {episodes.length} mixes
+    </p>
     <ul class="grid">
       {episodes.map((ep) => (
         <li class="card" data-tags={ep.tags.join('|')}>
@@ -82,6 +85,7 @@ const topTags = Object.entries(tagCounts)
 <script>
   const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
   const cards = document.querySelectorAll<HTMLLIElement>('.card')
+  const countVisible = document.getElementById('count-visible')!
   const noResults = document.querySelector<HTMLParagraphElement>('.no-results')!
 
   function filter(tag: string) {
@@ -94,6 +98,7 @@ const topTags = Object.entries(tagCounts)
       if (match) visible++
     })
 
+    countVisible.textContent = String(visible)
     noResults.textContent = visible === 0 ? `No mixes tagged "${tag}"` : ''
   }
 
@@ -187,7 +192,13 @@ const topTags = Object.entries(tagCounts)
   main {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2.5rem 1.5rem 6rem;
+    padding: 1.5rem 1.5rem 6rem;
+  }
+
+  .count {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
   }
 
   .grid {
@@ -279,135 +290,5 @@ const topTags = Object.entries(tagCounts)
     color: var(--text-secondary);
     padding: 4rem 0;
     font-size: 0.95rem;
-  }
-</style>
-
-
-<style>
-  header {
-    padding: 2rem 1.5rem 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    align-items: baseline;
-    gap: 1.25rem;
-  }
-
-  h1 {
-    font-size: clamp(1.4rem, 3vw, 2rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--text);
-  }
-
-  .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-  }
-
-  .subtitle a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: transparent;
-    transition: text-decoration-color 0.15s;
-  }
-
-  .subtitle a:hover {
-    text-decoration-color: var(--accent);
-  }
-
-  main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem 6rem;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-    list-style: none;
-  }
-
-  .card a {
-    display: flex;
-    flex-direction: column;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    color: var(--text);
-    transition: border-color 0.2s, transform 0.2s, background 0.2s;
-    height: 100%;
-  }
-
-  .card a:hover {
-    border-color: var(--accent);
-    background: var(--surface-hover);
-    transform: translateY(-3px);
-  }
-
-  .cover {
-    aspect-ratio: 1;
-    overflow: hidden;
-    background: var(--border);
-    flex-shrink: 0;
-  }
-
-  .cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .card a:hover .cover img {
-    transform: scale(1.04);
-  }
-
-  .info {
-    padding: 0.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    flex: 1;
-  }
-
-  .name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: var(--text);
-  }
-
-  .meta {
-    display: flex;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    margin-top: auto;
-    padding-top: 0.3rem;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    list-style: none;
-  }
-
-  .tags li {
-    font-size: 0.65rem;
-    font-weight: 500;
-    background: var(--accent-dim);
-    color: var(--accent);
-    border-radius: 4px;
-    padding: 0.15rem 0.45rem;
-    letter-spacing: 0.02em;
   }
 </style>
