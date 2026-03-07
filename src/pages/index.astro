@@ -40,6 +40,11 @@ const topTags = Object.entries(tagCounts)
         <button class="filter-btn" data-tag={tag}>{tag}</button>
       ))}
     </div>
+    <button class="expand-btn" aria-label="Show all tags" aria-expanded="false">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
   </nav>
 
   <main>
@@ -83,6 +88,8 @@ const topTags = Object.entries(tagCounts)
   const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
   const cards = document.querySelectorAll<HTMLLIElement>('.card')
   const noResults = document.querySelector<HTMLParagraphElement>('.no-results')!
+  const expandBtn = document.querySelector<HTMLButtonElement>('.expand-btn')!
+  const filterInner = document.querySelector<HTMLDivElement>('.filter-inner')!
 
   function filter(tag: string) {
     let visible = 0
@@ -103,6 +110,11 @@ const topTags = Object.entries(tagCounts)
       btn.classList.add('active')
       filter(btn.dataset.tag ?? '')
     })
+  })
+
+  expandBtn.addEventListener('click', () => {
+    const expanded = filterInner.classList.toggle('is-expanded')
+    expandBtn.setAttribute('aria-expanded', String(expanded))
   })
 </script>
 
@@ -150,23 +162,52 @@ const topTags = Object.entries(tagCounts)
     top: 0;
     background: var(--bg);
     z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
   }
 
   .filter-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
+    flex: 1;
     display: flex;
     gap: 0.4rem;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    flex-wrap: nowrap;
+    transition: flex-wrap 0s;
+  }
+
+  .filter-inner.is-expanded {
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
 
   .filter-inner::-webkit-scrollbar {
     display: none;
+  }
+
+  .expand-btn {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    margin-top: 0.05rem;
+  }
+
+  .expand-btn:hover,
+  .expand-btn[aria-expanded="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .filter-btn {
