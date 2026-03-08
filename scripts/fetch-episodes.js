@@ -28,6 +28,21 @@ const TAG_ALIASES = {
   'atmospheric drum and bass': 'Drum & Bass',
   'techstep': 'Drum & Bass',
 
+  // Techno (consolidate Minimal, Minimal Techno, typos)
+  'minimal': 'Techno',
+  'minimal techno': 'Techno',
+  'mininmal': 'Techno',
+  'tech': 'Techno',
+  'ambient techno': 'Techno',
+
+  // Electronic
+  'electronica': 'Electronic',
+
+  // House
+  'deep house': 'House',
+  'tech house': 'House',
+  'slow house': 'House',
+
   // Downtempo
   'downtemp': 'Downtempo',
   'downtmpo': 'Downtempo',
@@ -44,17 +59,77 @@ const TAG_ALIASES = {
   // Lo-fi / Slo-fi
   'slow-fi': 'Lo-fi',
   'slo fi': 'Lo-fi',
+  'chill': 'Lo-fi',
 
   // Slowcore
   'slow-core': 'Slowcore',
   'slow-wave': 'Slo:Wave',
 
-  // Instrumental Hip Hop
+  // Hip Hop
   'instumental hip hop': 'Instrumental Hip Hop',
   'intrumental hip hop': 'Instrumental Hip Hop',
   'inst. hip hip': 'Instrumental Hip Hop',
   'instrumental hip hop': 'Instrumental Hip Hop',
   'underground hip hop': 'Hip Hop',
+  'beats (hip hop)': 'Hip Hop',
+  'rap': 'Hip Hop',
+
+  // Psychedelic
+  'psych': 'Psychedelic',
+  'psychedelic rock': 'Psychedelic',
+
+  // Disco
+  'cosmic disco': 'Disco',
+  'space disco': 'Disco',
+
+  // Dubstep
+  'wobble': 'Dubstep',
+  'drumstep': 'Dubstep',
+  'freqstep': 'Dubstep',
+
+  // Jungle
+  'jump up': 'Jungle',
+
+  // Reggae
+  'raggamuffin': 'Reggae',
+  'dub roots reggae': 'Dub Reggae',
+
+  // Dub
+  'dubwise': 'Dub',
+  'tech dub': 'Dub techno',
+  'vapordub': 'Dub',
+
+  // Ambient
+  'beatless': 'Ambient',
+  'experimental ambient': 'Ambient',
+  'ambient sleep drone atmospheric electronic': 'Ambient',
+
+  // Vocals
+  'vocal': 'Vocals',
+
+  // Breakbeat
+  'breaks': 'Breakbeat',
+  'electro breaks': 'Breakbeat',
+
+  // Glitch
+  'fattyglitch': 'Glitch',
+
+  // Classical
+  'neo-classical': 'Modern Classical',
+
+  // Funk
+  '20funkcentury1st': 'Funk',
+  '20funkcenturyfirst': 'Funk',
+
+  // Phonk
+  '20phonkcentury1st': 'Phonk',
+
+  // Afro
+  'afrobeats': 'Afro',
+  'afro-latin': 'Afro',
+
+  // Soundscape
+  'scenic sounds': 'Soundscape',
 
   // Footwork
   'footwork/juke': 'Footwork',
@@ -63,10 +138,11 @@ const TAG_ALIASES = {
   // Vaporwave
   'vapourware': 'Vaporwave',
 
-  // Left Handed Japanese Trap (kingstonpork's own tag — keep but unify casing)
+  // Left Handed Japanese Trap
   'lefthandedjapanesefirst': 'Left Handed Japanese Trap',
   'lefthandedjapanesestep': 'Left Handed Japanese Trap',
   'lefthanded japanese trap': 'Left Handed Japanese Trap',
+  'lefthandedjapanesetrap': 'Left Handed Japanese Trap',
 }
 
 function normaliseTag(raw) {
