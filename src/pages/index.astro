@@ -49,9 +49,9 @@ const topTags = Object.entries(tagCounts)
     </p>
     <ul class="grid">
       {episodes.map((ep) => (
-        <li class="card" data-tags={ep.tags.join('|')}>
-          <a href={ep.url} target="_blank" rel="noopener noreferrer">
-            <div class="cover">
+        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key}>
+          <div class="card-inner">
+            <button type="button" class="cover" aria-label={`Play ${ep.name}`}>
               <img
                 src={ep.pictures['320wx320h'] ?? ep.pictures.large}
                 alt={ep.name}
@@ -59,8 +59,11 @@ const topTags = Object.entries(tagCounts)
                 width="320"
                 height="320"
               />
-            </div>
-            <div class="info">
+              <div class="play-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21" /></svg>
+              </div>
+            </button>
+            <a href={ep.url} target="_blank" rel="noopener noreferrer" class="info">
               <span class="name">{ep.name}</span>
               <div class="meta">
                 <span>{formatDate(ep.created_time)}</span>
@@ -74,13 +77,20 @@ const topTags = Object.entries(tagCounts)
                   ))}
                 </ul>
               )}
-            </div>
-          </a>
+            </a>
+          </div>
         </li>
       ))}
     </ul>
     <p class="no-results" aria-live="polite"></p>
   </main>
+
+  <aside id="player" class="player" hidden>
+    <div class="player-inner">
+      <button type="button" id="player-close" class="player-close" aria-label="Close player">&times;</button>
+      <iframe id="player-iframe" width="100%" height="120" frameborder="0" allow="autoplay" loading="lazy"></iframe>
+    </div>
+  </aside>
 </Layout>
 
 <script>
@@ -119,6 +129,33 @@ const topTags = Object.entries(tagCounts)
       btn.classList.add('active')
       filter(btn.dataset.tag ?? '')
     })
+  })
+
+  // Embed player
+  const player = document.getElementById('player')!
+  const iframe = document.getElementById('player-iframe') as HTMLIFrameElement
+  const closeBtn = document.getElementById('player-close')!
+
+  function play(key: string) {
+    const src = `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(key)}&hide_cover=1&light=1&autoplay=1`
+    iframe.src = src
+    player.hidden = false
+    document.body.classList.add('player-open')
+  }
+
+  cards.forEach((card) => {
+    card.querySelector('.cover')!.addEventListener('click', () => {
+      cards.forEach((c) => c.classList.remove('playing'))
+      card.classList.add('playing')
+      play(card.dataset.key!)
+    })
+  })
+
+  closeBtn.addEventListener('click', () => {
+    player.hidden = true
+    iframe.src = ''
+    document.body.classList.remove('player-open')
+    cards.forEach((c) => c.classList.remove('playing'))
   })
 </script>
 
@@ -218,7 +255,7 @@ const topTags = Object.entries(tagCounts)
     list-style: none;
   }
 
-  .card a {
+  .card-inner {
     display: flex;
     flex-direction: column;
     background: var(--surface);
@@ -226,14 +263,16 @@ const topTags = Object.entries(tagCounts)
     border-radius: var(--radius);
     overflow: hidden;
     color: var(--text);
-    transition: border-color 0.2s, transform 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s;
     height: 100%;
   }
 
-  .card a:hover {
-    border-color: var(--accent);
+  .card-inner:hover {
     background: var(--surface-hover);
-    transform: translateY(-3px);
+  }
+
+  .card.playing .card-inner {
+    border-color: var(--accent);
   }
 
   .cover {
@@ -241,6 +280,38 @@ const topTags = Object.entries(tagCounts)
     overflow: hidden;
     background: var(--border);
     flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+    border: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  .play-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .play-icon svg {
+    width: 2.5rem;
+    height: 2.5rem;
+    color: #fff;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+  }
+
+  .cover:hover .play-icon,
+  .card.playing .play-icon {
+    opacity: 1;
+  }
+
+  .card.playing .play-icon {
+    background: rgba(0, 0, 0, 0.5);
   }
 
   .cover img {
@@ -250,7 +321,7 @@ const topTags = Object.entries(tagCounts)
     transition: transform 0.3s ease;
   }
 
-  .card a:hover .cover img {
+  .cover:hover img {
     transform: scale(1.04);
   }
 
@@ -260,6 +331,10 @@ const topTags = Object.entries(tagCounts)
     flex-direction: column;
     gap: 0.4rem;
     flex: 1;
+  }
+
+  .info:hover .name {
+    color: var(--accent);
   }
 
   .name {
@@ -300,5 +375,56 @@ const topTags = Object.entries(tagCounts)
     color: var(--text-secondary);
     padding: 4rem 0;
     font-size: 0.95rem;
+  }
+
+  .player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.3);
+  }
+
+  .player-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0.5rem 1.5rem;
+    position: relative;
+  }
+
+  .player-close {
+    position: absolute;
+    top: -0.5rem;
+    right: 1.5rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s, border-color 0.15s;
+    z-index: 1;
+  }
+
+  .player-close:hover {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .player iframe {
+    display: block;
+    border-radius: 4px;
+  }
+
+  :global(body.player-open) main {
+    padding-bottom: 8rem;
   }
 </style>
