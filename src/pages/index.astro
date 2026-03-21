@@ -132,22 +132,91 @@ const topTags = Object.entries(tagCounts)
     noResults.textContent = visible === 0 ? `No mixes tagged "${tag}"` : ''
   }
 
+  function applyTag(tag: string) {
+    buttons.forEach((b) => b.classList.remove('active'))
+    const active = [...buttons].find((b) => b.dataset.tag === tag) ?? buttons[0]
+    active.classList.add('active')
+    filter(active.dataset.tag ?? '')
+  }
+
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      buttons.forEach((b) => b.classList.remove('active'))
-      btn.classList.add('active')
-      filter(btn.dataset.tag ?? '')
+      const tag = btn.dataset.tag ?? ''
+      const params = new URLSearchParams(location.search)
+      if (tag) {
+        params.set('tag', tag)
+      } else {
+        params.delete('tag')
+      }
+      history.replaceState(null, '', `${location.pathname}${params.size ? '?' + params : ''}`)
+      applyTag(tag)
     })
   })
+
+  // Apply tag from URL on load
+  const initialTag = new URLSearchParams(location.search).get('tag') ?? ''
+  applyTag(initialTag)
 
   // Embed player
   const player = document.getElementById('player')!
   const iframe = document.getElementById('player-iframe') as HTMLIFrameElement
   const closeBtn = document.getElementById('player-close')!
 
+  const STORAGE_KEY = 'ef:progress'
+
+  function loadProgress(): Record<string, number> {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') } catch { return {} }
+  }
+
+  function saveProgress(key: string, position: number) {
+    const all = loadProgress()
+    all[key] = position
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
+  }
+
+  let widget: any = null
+  let currentKey = ''
+  let pendingSeek = 0
+
+  function initWidget() {
+    // @ts-ignore
+    widget = Mixcloud.PlayerWidget(iframe)
+    widget.ready.then(() => {
+      widget.events.progress.on((position: number, duration: number) => {
+        if (duration === 0) return
+
+        if (pendingSeek > 0) {
+          widget.seek(pendingSeek)
+          pendingSeek = 0
+          return
+        }
+
+        if (currentKey && position > 0) {
+          if (duration - position > 30) {
+            saveProgress(currentKey, position)
+          } else {
+            const all = loadProgress()
+            delete all[currentKey]
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
+          }
+        }
+      })
+    })
+  }
+
   function play(key: string) {
-    const src = `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(key)}&hide_cover=1&light=1&autoplay=1`
-    iframe.src = src
+    const savedPosition = loadProgress()[key] ?? 0
+    currentKey = key
+    pendingSeek = savedPosition
+
+    if (widget && iframe.src && !iframe.src.includes(encodeURIComponent(key))) {
+      widget.load(key, true)
+    } else {
+      const src = `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(key)}&hide_cover=1&light=1&autoplay=1`
+      iframe.src = src
+      iframe.onload = () => initWidget()
+    }
+
     player.hidden = false
     document.body.classList.add('player-open')
   }
@@ -163,6 +232,8 @@ const topTags = Object.entries(tagCounts)
   closeBtn.addEventListener('click', () => {
     player.hidden = true
     iframe.src = ''
+    widget = null
+    currentKey = ''
     document.body.classList.remove('player-open')
     cards.forEach((c) => c.classList.remove('playing'))
   })
