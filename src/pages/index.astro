@@ -237,6 +237,13 @@ const topTags = Object.entries(tagCounts)
     document.body.classList.remove('player-open')
     cards.forEach((c) => c.classList.remove('playing'))
   })
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' || !widget || player.hidden) return
+    if ((e.target as Element).matches('input, textarea, button, [contenteditable]')) return
+    e.preventDefault()
+    widget.togglePlay()
+  })
 </script>
 
 <style>
