@@ -49,7 +49,7 @@ const topTags = Object.entries(tagCounts)
     </p>
     <ul class="grid">
       {episodes.map((ep) => (
-        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key} data-slug={ep.slug}>
+        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key} data-slug={ep.slug} data-name={ep.name}>
           <div class="card-inner">
             <button type="button" class="cover" aria-label={`Play ${ep.name}`}>
               <img
@@ -177,6 +177,7 @@ const topTags = Object.entries(tagCounts)
   let widget: any = null
   let currentKey = ''
   let pendingSeek = 0
+  const originalTitle = document.title
 
   function initWidget() {
     // @ts-ignore
@@ -227,6 +228,7 @@ const topTags = Object.entries(tagCounts)
     player.hidden = false
     document.body.classList.add('player-open')
     setEpisodeParam(card?.dataset.slug ?? null)
+    if (card?.dataset.name) document.title = `${card.dataset.name} · ${originalTitle}`
   }
 
   cards.forEach((card) => {
@@ -245,6 +247,7 @@ const topTags = Object.entries(tagCounts)
     document.body.classList.remove('player-open')
     cards.forEach((c) => c.classList.remove('playing'))
     setEpisodeParam(null)
+    document.title = originalTitle
   })
 
   // Auto-play episode from URL on load
