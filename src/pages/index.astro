@@ -49,7 +49,7 @@ const topTags = Object.entries(tagCounts)
     </p>
     <ul class="grid">
       {episodes.map((ep) => (
-        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key}>
+        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key} data-slug={ep.slug}>
           <div class="card-inner">
             <button type="button" class="cover" aria-label={`Play ${ep.name}`}>
               <img
@@ -204,7 +204,14 @@ const topTags = Object.entries(tagCounts)
     })
   }
 
-  function play(key: string) {
+  function setEpisodeParam(key: string | null) {
+    const url = new URL(location.href)
+    if (key) url.searchParams.set('episode', key)
+    else url.searchParams.delete('episode')
+    history.replaceState(null, '', url)
+  }
+
+  function play(key: string, card?: Element) {
     const savedPosition = loadProgress()[key] ?? 0
     currentKey = key
     pendingSeek = savedPosition
@@ -219,13 +226,14 @@ const topTags = Object.entries(tagCounts)
 
     player.hidden = false
     document.body.classList.add('player-open')
+    setEpisodeParam(card?.dataset.slug ?? null)
   }
 
   cards.forEach((card) => {
     card.querySelector('.cover')!.addEventListener('click', () => {
       cards.forEach((c) => c.classList.remove('playing'))
       card.classList.add('playing')
-      play(card.dataset.key!)
+      play(card.dataset.key!, card)
     })
   })
 
@@ -236,7 +244,19 @@ const topTags = Object.entries(tagCounts)
     currentKey = ''
     document.body.classList.remove('player-open')
     cards.forEach((c) => c.classList.remove('playing'))
+    setEpisodeParam(null)
   })
+
+  // Auto-play episode from URL on load
+  const initialEpisode = new URLSearchParams(location.search).get('episode')
+  if (initialEpisode) {
+    const card = [...cards].find((c) => c.dataset.slug === initialEpisode)
+    if (card) {
+      cards.forEach((c) => c.classList.remove('playing'))
+      card.classList.add('playing')
+      play(card.dataset.key!, card)
+    }
+  }
 
   document.addEventListener('keydown', (e) => {
     if (e.code !== 'Space' || !widget || player.hidden) return
