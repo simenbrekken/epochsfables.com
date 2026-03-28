@@ -241,6 +241,7 @@ const topTags = Object.entries(tagCounts)
 
   closeBtn.addEventListener('click', () => {
     player.hidden = true
+    iframe.onload = null
     iframe.src = ''
     widget = null
     currentKey = ''
