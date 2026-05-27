@@ -1,5 +1,37 @@
 [
   {
+    "key": "/kingstonpork/epochs-fables-vol503/",
+    "slug": "epochs-fables-vol503",
+    "name": "Epoch's Fables Vol.503",
+    "url": "https://www.mixcloud.com/kingstonpork/epochs-fables-vol503/",
+    "description": "",
+    "tags": [
+      "Funk",
+      "Afro",
+      "Latin",
+      "Techno",
+      "Trap"
+    ],
+    "pictures": {
+      "small": "https://thumbnailer.mixcloud.com/unsafe/25x25/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "thumbnail": "https://thumbnailer.mixcloud.com/unsafe/50x50/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "medium_mobile": "https://thumbnailer.mixcloud.com/unsafe/80x80/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "medium": "https://thumbnailer.mixcloud.com/unsafe/100x100/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "large": "https://thumbnailer.mixcloud.com/unsafe/300x300/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "320wx320h": "https://thumbnailer.mixcloud.com/unsafe/320x320/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "extra_large": "https://thumbnailer.mixcloud.com/unsafe/600x600/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "640wx640h": "https://thumbnailer.mixcloud.com/unsafe/640x640/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "768wx768h": "https://thumbnailer.mixcloud.com/unsafe/768x768/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617",
+      "1024wx1024h": "https://thumbnailer.mixcloud.com/unsafe/1024x1024/extaudio/9/2/9/a/5a4e-d102-4e02-92fc-c1ea5e4ea617"
+    },
+    "audio_length": 4327,
+    "created_time": "2026-05-26T16:22:28Z",
+    "play_count": 15,
+    "favorite_count": 2,
+    "listener_count": 4,
+    "repost_count": 0
+  },
+  {
     "key": "/kingstonpork/epochs-fables-vol502/",
     "slug": "epochs-fables-vol502",
     "name": "Epoch's Fables Vol.502",
