@@ -1,5 +1,37 @@
 [
   {
+    "key": "/kingstonpork/epochs-fables-vol506/",
+    "slug": "epochs-fables-vol506",
+    "name": "Epoch's Fables Vol.506",
+    "url": "https://www.mixcloud.com/kingstonpork/epochs-fables-vol506/",
+    "description": "",
+    "tags": [
+      "Ambient",
+      "Downtempo",
+      "Drone",
+      "Baltic",
+      "Soundtrack"
+    ],
+    "pictures": {
+      "small": "https://thumbnailer.mixcloud.com/unsafe/25x25/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "thumbnail": "https://thumbnailer.mixcloud.com/unsafe/50x50/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "medium_mobile": "https://thumbnailer.mixcloud.com/unsafe/80x80/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "medium": "https://thumbnailer.mixcloud.com/unsafe/100x100/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "large": "https://thumbnailer.mixcloud.com/unsafe/300x300/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "320wx320h": "https://thumbnailer.mixcloud.com/unsafe/320x320/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "extra_large": "https://thumbnailer.mixcloud.com/unsafe/600x600/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "640wx640h": "https://thumbnailer.mixcloud.com/unsafe/640x640/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "768wx768h": "https://thumbnailer.mixcloud.com/unsafe/768x768/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb",
+      "1024wx1024h": "https://thumbnailer.mixcloud.com/unsafe/1024x1024/extaudio/5/c/c/e/4126-4503-4911-8fa2-675663fc04fb"
+    },
+    "audio_length": 7753,
+    "created_time": "2026-06-23T14:40:30Z",
+    "play_count": 26,
+    "favorite_count": 2,
+    "listener_count": 10,
+    "repost_count": 0
+  },
+  {
     "key": "/kingstonpork/epochs-fables-vol505/",
     "slug": "epochs-fables-vol505",
     "name": "Epoch's Fables Vol.505",
