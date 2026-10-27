@@ -1,567 +1,115 @@
 ---
 import Layout from '../layouts/Layout.astro'
-import episodes from '../../data/episodes.json'
+import archive from '../../data/episodes.json'
+import { artwork, episodeLabel, newestFirst } from '../lib/episodes.js'
+import { browseTags, rankTags } from '../lib/tags.js'
 
-function formatDuration(seconds: number) {
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-
-  return h > 0 ? `${h}h ${m}m` : `${m}m`
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-}
-
-const tagCounts: Record<string, number> = {}
-episodes.forEach((ep) => ep.tags.forEach((t) => { tagCounts[t] = (tagCounts[t] ?? 0) + 1 }))
-const topTags = Object.entries(tagCounts)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 35)
-  .map(([tag]) => tag)
-  .sort((a, b) => a.localeCompare(b))
+const episodes = newestFirst(archive)
+const latest = episodes[0]
+const popularTags = browseTags(episodes)
+const tags = rankTags(episodes).sort((a, b) => a.localeCompare(b, 'en'))
 ---
 
 <Layout>
-  <header>
-    <div class="header-inner">
-      <h1>Epoch's Fables</h1>
-      <p class="subtitle">by <a href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">kingstonpork</a></p>
+  <a class="skip" href="#recordings">Skip to mixes</a>
+  <header class="contact-masthead">
+    {latest && (
+      <picture class="masthead-art" data-episode={latest.slug} aria-hidden="true">
+        <img src={artwork(latest.pictures)} alt="" fetchpriority="high" />
+      </picture>
+    )}
+    <div class="contact-name">
+      <h1 class="wordmark"><a href="/" data-tag="" aria-label="Epoch's Fables home">Epoch's <span>Fables.</span></a></h1>
+      <p class="contact-credit">
+        by <a href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">kingstonpork ↗</a>
+        <span>2010 — {new Date().getFullYear()}</span>
+      </p>
     </div>
   </header>
 
-  <nav class="filter-bar" aria-label="Filter by tag">
-    <div class="filter-inner">
-      <button class="filter-btn active" data-tag="">All</button>
-      {topTags.map((tag) => (
-        <button class="filter-btn" data-tag={tag}>{tag}</button>
-      ))}
-    </div>
-  </nav>
+  <div class="site">
+    <nav class="tag-navigation" aria-label="Browse episode tags">
+      <div class="tag-body">
+        <div class="tag-topline">
+          <h2 id="tag-heading">Popular tags</h2>
+          <span class="tag-reset" hidden><a data-tag="" href="/">Reset to popular</a></span>
+        </div>
+        <div class="tag-scroll" tabindex="0" role="region" aria-label="The 25 most used tags in alphabetical order">
+          <ul class="tag-list">
+            {tags.map((tag) => (
+              <li hidden={!popularTags.includes(tag)}>
+                <a class="tag-link" data-tag={tag} href={`?tag=${encodeURIComponent(tag)}`}>{tag}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-  <main>
-    <p class="count" aria-live="polite" aria-atomic="true">
-      <span id="count-visible">{episodes.length}</span> of {episodes.length} mixes
-    </p>
-    <ul class="grid">
-      {episodes.map((ep) => (
-        <li class="card" data-tags={ep.tags.join('|')} data-key={ep.key} data-slug={ep.slug} data-name={ep.name}>
-          <div class="card-inner">
-            <button type="button" class="cover" aria-label={`Play ${ep.name}`}>
-              <img
-                src={ep.pictures['320wx320h'] ?? ep.pictures.large}
-                alt={ep.name}
-                loading="lazy"
-                width="320"
-                height="320"
-              />
-              <div class="play-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21" /></svg>
-              </div>
-            </button>
-            <a href={ep.url} target="_blank" rel="noopener noreferrer" class="info">
-              <span class="name">{ep.name}</span>
-              <div class="meta">
-                <span>{formatDate(ep.created_time)}</span>
-                <span>·</span>
-                <span>{formatDuration(ep.audio_length)}</span>
-              </div>
-              {ep.tags.length > 0 && (
-                <ul class="tags">
-                  {ep.tags.slice(0, 3).map((tag) => (
-                    <li>{tag}</li>
-                  ))}
-                </ul>
-              )}
-            </a>
-          </div>
-        </li>
-      ))}
-    </ul>
-    <p class="no-results" aria-live="polite"></p>
-  </main>
+    <main id="recordings">
+      <header class="results-bar">
+        <div class="results-title">
+          <h2 tabindex="-1" id="results-heading">All mixes</h2>
+          <span class="result-count" aria-live="polite" aria-atomic="true">{episodes.length} mixes</span>
+        </div>
+        <span class="sort-label">Newest first ↓</span>
+      </header>
+      <p class="touch-hint">Tap a sleeve for its title and tags.</p>
+      <ul class="episode-grid">
+        {episodes.map((ep, index) => {
+          const label = episodeLabel(ep.name)
+          return (
+            <li class="episode" id={ep.slug} data-tags={JSON.stringify(ep.tags)} data-key={ep.key} data-slug={ep.slug} data-name={ep.name}>
+              <article class="cover-tile" aria-label={ep.name}>
+                <a class="cover-listen" data-play href={ep.url} target="_blank" rel="noopener noreferrer" aria-label={`Play ${ep.name}`} aria-description={ep.tags.join(', ')}>
+                  <span class="photo-resolve">
+                    <img class="cover-image" src={artwork(ep.pictures)} alt={`Original cover artwork for ${ep.name}`} loading={index < 6 ? 'eager' : 'lazy'} width="640" height="640" crossorigin="anonymous" />
+                  </span>
+                  <span class:list={['cover-label', { 'cover-label--title': label === ep.name.trim() }]} aria-hidden="true">{label}</span>
+                </a>
+                <button class="touch-cover" type="button" aria-label={`Show details for ${ep.name}`} aria-expanded="false" aria-controls={`info-${ep.slug}`}></button>
+                <div class="cover-info" id={`info-${ep.slug}`}>
+                  <h3><a class="cover-title" data-play href={ep.url} target="_blank" rel="noopener noreferrer">{ep.name}</a></h3>
+                  {ep.tags.length > 0 && (
+                    <ul class="cover-tags">
+                      {ep.tags.map((tag) => (
+                        <li><a class="cover-tag" data-tag={tag} href={`?tag=${encodeURIComponent(tag)}`}>{tag}</a></li>
+                      ))}
+                    </ul>
+                  )}
+                  <button class="close-details" type="button">Close details</button>
+                </div>
+              </article>
+            </li>
+          )
+        })}
+      </ul>
+      <section class="empty-results" hidden={episodes.length > 0}>
+        <h3>No mixes in this view.</h3>
+        <a data-tag="" href="/">Return to all mixes</a>
+      </section>
 
-  <aside id="player" class="player" hidden>
+      <footer class="archive-footer">
+        <a class="source-link" href="https://github.com/simenbrekken/epochsfables.com" target="_blank" rel="noopener noreferrer">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+          View source on GitHub
+        </a>
+        <a href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">Listen on Mixcloud ↗</a>
+      </footer>
+    </main>
+  </div>
+
+  <aside id="player" class="player" aria-label="Mixcloud player" hidden>
     <div class="player-inner">
       <button type="button" id="player-close" class="player-close" aria-label="Close player">&times;</button>
-      <iframe id="player-iframe" width="100%" height="120" frameborder="0" allow="autoplay" loading="lazy"></iframe>
+      <iframe id="player-iframe" title="Mixcloud episode player" width="100%" height="120" frameborder="0" allow="autoplay" loading="lazy"></iframe>
+      <p id="player-error" role="alert" hidden>Playback could not load. <a id="player-external" href="https://www.mixcloud.com/kingstonpork/" target="_blank" rel="noopener noreferrer">Listen on Mixcloud</a></p>
     </div>
   </aside>
-
-  <footer>
-    <a href="https://github.com/simenbrekken/epochsfables.com" target="_blank" rel="noopener noreferrer">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-      View source on GitHub
-    </a>
-  </footer>
 </Layout>
 
 <script>
-  const TAG_GROUPS: Record<string, string[]> = {
-    'Drum & Bass': ['Drum & Bass', 'Liquid Drum & Bass', 'Minimal D&B'],
-    'Reggae': ['Reggae', 'Dub Reggae'],
-    'Hip Hop': ['Hip Hop', 'Instrumental Hip Hop'],
-    'Techno': ['Techno', 'Dub techno'],
-    'Dub': ['Dub', 'Dub techno', 'Dub poetry'],
-    'House': ['House'],
-  }
-
-  const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn')
-  const cards = document.querySelectorAll<HTMLLIElement>('.card')
-  const countVisible = document.getElementById('count-visible')!
-  const noResults = document.querySelector<HTMLParagraphElement>('.no-results')!
-
-  function filter(tag: string) {
-    const matchTags = TAG_GROUPS[tag] ?? (tag ? [tag] : null)
-    let visible = 0
-
-    cards.forEach((card) => {
-      const cardTags = (card.dataset.tags ?? '').split('|')
-      const match = !matchTags || matchTags.some((t) => cardTags.includes(t))
-      card.hidden = !match
-      if (match) visible++
-    })
-
-    countVisible.textContent = String(visible)
-    noResults.textContent = visible === 0 ? `No mixes tagged "${tag}"` : ''
-  }
-
-  function applyTag(tag: string) {
-    buttons.forEach((b) => b.classList.remove('active'))
-    const active = [...buttons].find((b) => b.dataset.tag === tag) ?? buttons[0]
-    active.classList.add('active')
-    filter(active.dataset.tag ?? '')
-  }
-
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const tag = btn.dataset.tag ?? ''
-      const params = new URLSearchParams(location.search)
-      if (tag) {
-        params.set('tag', tag)
-      } else {
-        params.delete('tag')
-      }
-      history.replaceState(null, '', `${location.pathname}${params.size ? '?' + params : ''}`)
-      applyTag(tag)
-    })
-  })
-
-  // Apply tag from URL on load
-  const initialTag = new URLSearchParams(location.search).get('tag') ?? ''
-  applyTag(initialTag)
-
-  // Embed player
-  const player = document.getElementById('player')!
-  const iframe = document.getElementById('player-iframe') as HTMLIFrameElement
-  const closeBtn = document.getElementById('player-close')!
-
-  const STORAGE_KEY = 'ef:progress'
-
-  function loadProgress(): Record<string, number> {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') } catch { return {} }
-  }
-
-  function saveProgress(key: string, position: number) {
-    const all = loadProgress()
-    all[key] = position
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
-  }
-
-  let widget: any = null
-  let currentKey = ''
-  let pendingSeek = 0
-  const originalTitle = document.title
-
-  function initWidget() {
-    // @ts-ignore
-    widget = Mixcloud.PlayerWidget(iframe)
-    widget.ready.then(() => {
-      widget.events.progress.on((position: number, duration: number) => {
-        if (duration === 0) return
-
-        if (pendingSeek > 0) {
-          widget.seek(pendingSeek)
-          pendingSeek = 0
-          return
-        }
-
-        if (currentKey && position > 0) {
-          if (duration - position > 30) {
-            saveProgress(currentKey, position)
-          } else {
-            const all = loadProgress()
-            delete all[currentKey]
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
-          }
-        }
-      })
-    })
-  }
-
-  function setEpisodeParam(key: string | null) {
-    const url = new URL(location.href)
-    if (key) url.searchParams.set('episode', key)
-    else url.searchParams.delete('episode')
-    history.replaceState(null, '', url)
-  }
-
-  function play(key: string, card?: Element) {
-    const savedPosition = loadProgress()[key] ?? 0
-    currentKey = key
-    pendingSeek = savedPosition
-
-    if (widget && iframe.src && !iframe.src.includes(encodeURIComponent(key))) {
-      widget.load(key, true)
-    } else {
-      const src = `https://player-widget.mixcloud.com/widget/iframe/?feed=${encodeURIComponent(key)}&hide_cover=1&light=1&autoplay=1`
-      iframe.src = src
-      iframe.onload = () => initWidget()
-    }
-
-    player.hidden = false
-    document.body.classList.add('player-open')
-    setEpisodeParam(card?.dataset.slug ?? null)
-    if (card?.dataset.name) document.title = `${card.dataset.name} · ${originalTitle}`
-  }
-
-  cards.forEach((card) => {
-    card.querySelector('.cover')!.addEventListener('click', () => {
-      cards.forEach((c) => c.classList.remove('playing'))
-      card.classList.add('playing')
-      play(card.dataset.key!, card)
-    })
-  })
-
-  closeBtn.addEventListener('click', () => {
-    player.hidden = true
-    iframe.onload = null
-    iframe.src = ''
-    widget = null
-    currentKey = ''
-    document.body.classList.remove('player-open')
-    cards.forEach((c) => c.classList.remove('playing'))
-    setEpisodeParam(null)
-    document.title = originalTitle
-  })
-
-  // Auto-play episode from URL on load
-  const initialEpisode = new URLSearchParams(location.search).get('episode')
-  if (initialEpisode) {
-    const card = [...cards].find((c) => c.dataset.slug === initialEpisode)
-    if (card) {
-      cards.forEach((c) => c.classList.remove('playing'))
-      card.classList.add('playing')
-      play(card.dataset.key!, card)
-    }
-  }
-
-  document.addEventListener('keydown', (e) => {
-    if (!widget || player.hidden) return
-    if ((e.target as Element).matches('input, textarea, button, [contenteditable]')) return
-    if (e.code === 'Space') {
-      e.preventDefault()
-      widget.togglePlay()
-    } else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
-      e.preventDefault()
-      widget.getPosition().then((pos: number) => {
-        widget.seek(pos + (e.code === 'ArrowRight' ? 30 : -30))
-      })
-    }
-  })
+  import '../scripts/archive'
 </script>
-
-<style>
-  header {
-    padding: 2.5rem 1.5rem 2rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .header-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-
-  h1 {
-    font-size: clamp(2.8rem, 6vw, 4rem);
-    font-weight: 900;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    color: var(--text);
-  }
-
-  .subtitle {
-    margin-top: 0.4rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-  }
-
-  .subtitle a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-color: transparent;
-    transition: text-decoration-color 0.15s;
-  }
-
-  .subtitle a:hover {
-    text-decoration-color: var(--accent);
-  }
-
-  .filter-bar {
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 10;
-    padding: 0.75rem 1.5rem;
-  }
-
-  .filter-inner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .filter-btn {
-    flex-shrink: 0;
-    font-size: 0.78rem;
-    font-weight: 500;
-    font-family: inherit;
-    padding: 0.35rem 0.85rem;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
-  }
-
-  .filter-btn:hover {
-    border-color: var(--accent);
-    color: var(--text);
-  }
-
-  .filter-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-
-  main {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1.5rem 1.5rem 6rem;
-  }
-
-  .count {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    margin-bottom: 1.25rem;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-    list-style: none;
-  }
-
-  .card-inner {
-    display: flex;
-    flex-direction: column;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    color: var(--text);
-    transition: border-color 0.2s, background 0.2s;
-    height: 100%;
-  }
-
-  .card-inner:hover {
-    background: var(--surface-hover);
-  }
-
-  .card.playing .card-inner {
-    border-color: var(--accent);
-  }
-
-  .cover {
-    aspect-ratio: 1;
-    overflow: hidden;
-    background: var(--border);
-    flex-shrink: 0;
-    position: relative;
-    cursor: pointer;
-    border: 0;
-    padding: 0;
-    width: 100%;
-  }
-
-  .play-icon {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.4);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-
-  .play-icon svg {
-    width: 2.5rem;
-    height: 2.5rem;
-    color: #fff;
-    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-  }
-
-  .cover:hover .play-icon,
-  .card.playing .play-icon {
-    opacity: 1;
-  }
-
-  .card.playing .play-icon {
-    background: rgba(0, 0, 0, 0.5);
-  }
-
-  .cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .cover:hover img {
-    transform: scale(1.04);
-  }
-
-  .info {
-    padding: 0.8rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    flex: 1;
-  }
-
-  .info:hover .name {
-    color: var(--accent);
-  }
-
-  .name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    line-height: 1.35;
-    color: var(--text);
-  }
-
-  .meta {
-    display: flex;
-    gap: 0.4rem;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    margin-top: auto;
-    padding-top: 0.3rem;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem;
-    list-style: none;
-  }
-
-  .tags li {
-    font-size: 0.65rem;
-    font-weight: 500;
-    background: var(--accent-dim);
-    color: var(--accent);
-    border-radius: 4px;
-    padding: 0.15rem 0.45rem;
-    letter-spacing: 0.02em;
-  }
-
-  .no-results {
-    text-align: center;
-    color: var(--text-secondary);
-    padding: 4rem 0;
-    font-size: 0.95rem;
-  }
-
-  .player {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.3);
-  }
-
-  .player-inner {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0.5rem 1.5rem;
-    position: relative;
-  }
-
-  .player-close {
-    position: absolute;
-    top: -0.5rem;
-    right: 1.5rem;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.15s, border-color 0.15s;
-    z-index: 1;
-  }
-
-  .player-close:hover {
-    color: var(--text);
-    border-color: var(--accent);
-  }
-
-  .player iframe {
-    display: block;
-    border-radius: 4px;
-  }
-
-  :global(body.player-open) main {
-    padding-bottom: 8rem;
-  }
-
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem 1.5rem;
-    text-align: center;
-  }
-
-  footer a {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    transition: color 0.15s;
-  }
-
-  footer a:hover {
-    color: var(--accent);
-  }
-</style>

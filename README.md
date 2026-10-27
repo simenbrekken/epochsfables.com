@@ -6,10 +6,14 @@ A fan archive of [kingstonpork](https://www.mixcloud.com/kingstonpork/)'s long-r
 
 ## Features
 
-- Browse all episodes with cover art, date, and tags
-- Filter by genre tag (Drum & Bass, Downtempo, Dub, and more)
+- Browse the full archive in a dark contact sheet, newest first, with the latest episode's artwork in the masthead
+- Hover or focus a cover for its full title and clickable tags; on touch screens, tap to open its details
+- Browse the 25 most common episode tags, selected by distinct mix count and displayed alphabetically
+- Select a tag to explore all co-occurring tags alphabetically; selecting another tag replaces the filter, and **Reset to popular** returns to all mixes
+- Broad genre filters retain their existing grouped matches (for example, Drum & Bass includes Liquid Drum & Bass and Minimal D&B); related tags come from those same matching mixes
 - Live mix count updates as you filter
-- Dark/light mode
+- Native Mixcloud playback, saved listening progress, and shareable episode/tag URLs
+- Finite entrance and filter transitions respect reduced-motion preferences
 
 ## Tech stack
 
@@ -33,7 +37,9 @@ npm run fetch
 ```bash
 npm install
 npm run dev      # start dev server at localhost:4321
+npm test         # focused tag, title and chronology checks
 npm run build    # build to dist/
 npm run preview  # preview the build locally
 ```
 
+The self-hosted Poppins fonts are distributed under the [SIL Open Font License](public/fonts/poppins-OFL.txt), with their original copyright notice included.
